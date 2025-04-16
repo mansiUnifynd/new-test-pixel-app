@@ -13,7 +13,7 @@ export async function action({ request }) {
   console.log("📥 Received clientId:", clientId);
 
   // Save clientId to a log file
-  const logFilePath = path.resolve("logs/clientId.log");
+  const logFilePath = path.resolve("clientId.log");
   await fs.appendFile(logFilePath, `clientId: ${clientId}\n`);
 
   // Save clientId to the in-memory store

@@ -3,7 +3,7 @@
 client_id = "c742c2ba100630ea4a69133bdbaf9130"
 name = "my-new-web-pixel-app"
 handle = "my-new-web-pixel-app"
-application_url = "https://feedback-providers-surprising-ix.trycloudflare.com"
+application_url = "https://my-new-web-pixel-app.fly.dev"
 embedded = true
 
 [build]
@@ -59,9 +59,9 @@ scopes = "read_assigned_fulfillment_orders,read_cart_transforms,read_checkout_br
 
 [auth]
 redirect_urls = [
-  "https://feedback-providers-surprising-ix.trycloudflare.com/auth/callback",
-  "https://feedback-providers-surprising-ix.trycloudflare.com/auth/shopify/callback",
-  "https://feedback-providers-surprising-ix.trycloudflare.com/api/auth/callback"
+  "https://my-new-web-pixel-app.fly.dev/auth/callback",
+  "https://my-new-web-pixel-app.fly.dev/auth/shopify/callback",
+  "https://my-new-web-pixel-app.fly.dev/api/auth/callback"
 ]
 
 [pos]
