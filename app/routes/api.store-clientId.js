@@ -12,7 +12,7 @@ export async function action({ request }) {
 
   console.log("📥 Received clientId:", clientId);
 
-  // Save clientId to a log file
+  // Save clientId to clientId.log file
   const logFilePath = path.resolve("clientId.log");
   await fs.appendFile(logFilePath, `clientId: ${clientId}\n`);
 

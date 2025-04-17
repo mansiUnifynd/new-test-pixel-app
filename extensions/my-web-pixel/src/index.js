@@ -50,7 +50,7 @@
 //               event: name,
 //               properties: {
 //                 distinct_id: clientId,
-//                 token: "5b1e136ab5f2e01c3ad5116151e68860",
+//                 token: "8f25e7ad6f912954ce63a4ac331ed541",
 //               },
 //             })
 //           ),
@@ -168,33 +168,147 @@
 
 
 
+// import { register } from '@shopify/web-pixels-extension';
+
+// register(({ analytics }) => {
+//   analytics.subscribe('all_standard_events', async (event) => {
+//     const { clientId } = event;
+
+//     try {
+//       const response = await fetch('https://api.mixpanel.com/track/', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//         body: new URLSearchParams({
+//           data: btoa(
+//             JSON.stringify({
+//               event: event.name,  // Corrected: use event.name or relevant property
+//               properties: {
+//                 distinct_id: clientId,
+//                 token: "5b1e136ab5f2e01c3ad5116151e68860",
+//               },
+//             })
+//           ),
+//         }),
+//       });
+
+//       const responseData = await response.text();
+//       console.log("Mixpanel Event Response:", responseData);
+
+//       const appURL = process.env.APP_URL;
+//       await fetch(`${appURL}/api/store-clientId`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           data: btoa(JSON.stringify({ clientId })),
+//         }),
+//       });
+
+//     } catch (error) {
+//       console.error("Event Error:", error);
+//     }
+//   });
+// });
+
+
+
+
+
+
+
 import { register } from '@shopify/web-pixels-extension';
+
+function flattenObject(obj, prefix = '') {
+  let flattened = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      Object.assign(flattened, flattenObject(value, newKey));
+    } else {
+      flattened[newKey] = value;
+    }
+  }
+  return flattened;
+}
+
+function getUTMParameters(url) {
+  if (!url) return {};
+  try {
+    const urlParams = new URLSearchParams(new URL(url).search);
+    return {
+      utm_source: urlParams.get("utm_source") || "None",
+      utm_medium: urlParams.get("utm_medium") || "None",
+      utm_campaign: urlParams.get("utm_campaign") || "None",
+      utm_term: urlParams.get("utm_term") || "None",
+      utm_content: urlParams.get("utm_content") || "None",
+    };
+  } catch (e) {
+    return {};
+  }
+}
 
 register(({ analytics }) => {
   analytics.subscribe('all_standard_events', async (event) => {
     const { clientId } = event;
+    const timeStamp = event.timestamp;
+    const eventId = event.id;
+    const eventType = event.name;
+    const pageUrl = event.data?.url || "Unknown";
+    const pathname = event.context?.window?.location?.pathname || event.data?.url || "/";
+    const orig_referrer = event.context?.document?.referrer || "Unknown";
+    const utmParams = getUTMParameters(event.data?.url);
+
+    const flatEventData = flattenObject(event.data || {});
+
+    const mixpanelToken = "8f25e7ad6f912954ce63a4ac331ed541";
+
+    // ✅ Step 1: Send User Profile Data to Mixpanel
+    const userProfilePayload = {
+      $token: mixpanelToken,
+      $distinct_id: clientId,
+      $set: {
+        $created_at: new Date().toISOString()
+      }
+    };
 
     try {
+      await fetch('https://api.mixpanel.com/engage/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ data: btoa(JSON.stringify(userProfilePayload)) })
+      });
+
+      // ✅ Step 2: Send Events Data to Mixpanel
+      const eventPayload = {
+        event: eventType,
+        properties: {
+          distinct_id: clientId,
+          token: mixpanelToken,
+          persistence: 'localStorage',
+          timeStamp: timeStamp,
+          $insert_id: eventId,
+          pageUrl: pageUrl,
+          pathname: pathname,
+          $referring_domain: orig_referrer,
+          ...flatEventData,
+          ...utmParams
+        },
+      };
+
       const response = await fetch('https://api.mixpanel.com/track/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          data: btoa(
-            JSON.stringify({
-              event: event.name,  // Corrected: use event.name or relevant property
-              properties: {
-                distinct_id: clientId,
-                token: "5b1e136ab5f2e01c3ad5116151e68860",
-              },
-            })
-          ),
+          data: btoa(JSON.stringify(eventPayload)),
         }),
       });
 
       const responseData = await response.text();
       console.log("Mixpanel Event Response:", responseData);
 
-      const appURL = process.env.APP_URL;
+      // ✅ Step 3: Send clientId to your backend
+      const appURL = process.env.APP_URL; 
       await fetch(`${appURL}/api/store-clientId`, {
         method: 'POST',
         headers: {
@@ -206,7 +320,7 @@ register(({ analytics }) => {
       });
 
     } catch (error) {
-      console.error("Event Error:", error);
+      console.error("Mixpanel Event Error:", error);
     }
   });
 });
