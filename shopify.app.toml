@@ -17,7 +17,6 @@ api_version = "2025-01"
   topics = [
   "app/scopes_update",
   "carts/create",
-  "carts/update",
   "checkouts/create",
   "checkouts/update",
   "customers/create",
