@@ -3,7 +3,7 @@
 client_id = "c742c2ba100630ea4a69133bdbaf9130"
 name = "my-new-web-pixel-app"
 handle = "my-new-web-pixel-app"
-application_url = "https://my-new-web-pixel-app.fly.dev"
+application_url = "https://equivalent-incl-lately-motels.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,7 +16,6 @@ api_version = "2025-01"
   [[webhooks.subscriptions]]
   topics = [
   "app/scopes_update",
-  "carts/create",
   "checkouts/create",
   "checkouts/update",
   "customers/create",
@@ -41,6 +40,10 @@ api_version = "2025-01"
   uri = "/webhooks"
 
   [[webhooks.subscriptions]]
+  topics = [ "carts/create" ]
+  uri = "/webhooks/app/carts-create"
+
+  [[webhooks.subscriptions]]
   topics = [ "fulfillments/create", "orders/fulfilled", "orders/updated" ]
   uri = "/webhooks/app/fulfillments"
 
@@ -58,9 +61,9 @@ scopes = "read_assigned_fulfillment_orders,read_cart_transforms,read_checkout_br
 
 [auth]
 redirect_urls = [
-  "https://my-new-web-pixel-app.fly.dev/auth/callback",
-  "https://my-new-web-pixel-app.fly.dev/auth/shopify/callback",
-  "https://my-new-web-pixel-app.fly.dev/api/auth/callback"
+  "https://equivalent-incl-lately-motels.trycloudflare.com/auth/callback",
+  "https://equivalent-incl-lately-motels.trycloudflare.com/auth/shopify/callback",
+  "https://equivalent-incl-lately-motels.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

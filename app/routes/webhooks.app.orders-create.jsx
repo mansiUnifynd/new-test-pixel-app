@@ -138,7 +138,7 @@ export const action = async ({ request }) => {
     const mixpanelEvent = {
       event: "Purchased",
       properties: {
-        token: "8f25e7ad6f912954ce63a4ac331ed541", // Replace with your actual Mixpanel token
+        token: "8f25e7ad6f912954ce63a4ac331ed541",
         distinct_id: latestClientId || "unknown", // Use clientId if available, otherwise fallback
         checkout_token: payload.checkout_token,
         shop,

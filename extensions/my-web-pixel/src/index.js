@@ -322,7 +322,6 @@
 //   });
 // });
 
-
 import { register } from '@shopify/web-pixels-extension';
 
 // ✅ Custom event name mapping — place it here at the top
@@ -365,13 +364,14 @@ function getUTMParameters(url) {
   }
 }
 
+const mixpanelToken = "8f25e7ad6f912954ce63a4ac331ed541";
+
 register(({ analytics }) => {
   analytics.subscribe('all_standard_events', async (event) => {
     const { clientId } = event;
     const timeStamp = event.timestamp;
     const eventId = event.id;
 
-    // ✅ Use the mapping here
     const originalEventType = event.name;
     const eventType = eventNameMap[originalEventType] || originalEventType;
 
@@ -380,8 +380,6 @@ register(({ analytics }) => {
     const orig_referrer = event.context?.document?.referrer || "Unknown";
     const utmParams = getUTMParameters(event.data?.url);
     const flatEventData = flattenObject(event.data || {});
-
-    const mixpanelToken = "8f25e7ad6f912954ce63a4ac331ed541";
 
     // Step 1: Send User Profile Data to Mixpanel
     const userProfilePayload = {
@@ -443,4 +441,38 @@ register(({ analytics }) => {
       console.error("Mixpanel Event Error:", error);
     }
   });
+
+  // Sending click events data
+  analytics.subscribe('clicked', async (event) => {
+    const flatEventData = flattenObject(event.data || {});
+    const { timestamp, id, clientId } = event;
+    const utmParams = getUTMParameters(event.data?.url);
+    const elementid = event.data?.element?.id || "Unknown Element";
+
+    try {
+      const response = await fetch('https://api.mixpanel.com/track/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          data: btoa(
+            JSON.stringify({
+              event: elementid,
+              properties: {
+                distinct_id: clientId,
+                token: mixpanelToken,
+                ...flatEventData,
+                ...utmParams
+              },
+            })
+          ),
+        }),
+      });
+
+      const responseData = await response.text();
+      console.log("Mixpanel Click Event Response:", responseData);
+    } catch (error) {
+      console.error("Mixpanel Click Event Error:", error);
+    }
+  });
+
 });
