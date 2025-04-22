@@ -364,6 +364,7 @@ function getUTMParameters(url) {
   }
 }
 
+
 const mixpanelToken = "8f25e7ad6f912954ce63a4ac331ed541";
 
 register(({ analytics }) => {
@@ -442,12 +443,15 @@ register(({ analytics }) => {
     }
   });
 
+
+
   // Sending click events data
   analytics.subscribe('clicked', async (event) => {
-    const flatEventData = flattenObject(event.data || {});
     const { timestamp, id, clientId } = event;
-    const utmParams = getUTMParameters(event.data?.url);
     const elementid = event.data?.element?.id || "Unknown Element";
+    const flatEventData = flattenObject(event.data || {});
+
+    const utmParams = getUTMParameters(event.data?.url);
 
     try {
       const response = await fetch('https://api.mixpanel.com/track/', {
@@ -456,7 +460,7 @@ register(({ analytics }) => {
         body: new URLSearchParams({
           data: btoa(
             JSON.stringify({
-              event: elementid,
+              event: elementid,  //Passing the parent element is as the event name
               properties: {
                 distinct_id: clientId,
                 token: mixpanelToken,
