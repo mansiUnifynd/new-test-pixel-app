@@ -322,6 +322,7 @@
 //   });
 // });
 
+
 import { register } from '@shopify/web-pixels-extension';
 
 // ✅ Custom event name mapping — place it here at the top
@@ -360,35 +361,45 @@ function getUTMParameters(url) {
       utm_content: urlParams.get("utm_content") || "None",
     };
   } catch (e) {
+    console.error("Failed to extract UTM parameters:", e.message);
     return {};
   }
 }
 
 function getParentIdByChildId(childId) {
-  try {
-    const child = document.getElementById(childId);
-    if (!child) {
-      const message = `❌ Child element with id "${childId}" not found in DOM.`;
-      console.warn(message);
-      console.error(new Error(message));
-      return null;
-    }
-
-    const parent = child.parentElement;
-    if (!parent) {
-      const message = `⚠️ Parent of element "${childId}" not found. Returning child id.`;
-      console.warn(message);
-      console.error(new Error(message));
-      return child.id;
-    }
-
-    return parent.id || child.id;
-  } catch (err) {
-    console.error("🔥 Unexpected error in getParentIdByChildId:", err);
-    return null;
+  const child = document.getElementById(childId);
+  if (child && child.parentElement) {
+    return child.parentElement.id || child.id;
   }
+  return child ? child.id : null;
 }
 
+
+//Working parent id by element id
+// function getParentIdByChildId(childId) {
+//   if (!childId) {
+//     console.error("getParentIdByChildId was called with an invalid childId:", childId);
+//     return null;
+//   }
+
+//   const child = document.getElementById(childId);
+//   if (child && child.parentElement) {
+//     const parentId = child.parentElement.id;
+//     if (!parentId) {
+//       console.error(`Parent element found but it has no ID. Child ID: ${childId}`);
+//       return child.id;
+//     }
+//     return parentId;
+//   }
+
+//   if (!child) {
+//     console.error(`No element found with the provided childId: ${childId}`);
+//   } else {
+//     console.error(`Element found for childId: ${childId}, but it has no parent element.`);
+//   }
+
+//   return child ? child.id : null;
+// }
 
 const mixpanelToken = "5b1e136ab5f2e01c3ad5116151e68860";
 
@@ -397,7 +408,7 @@ register(({ analytics }) => {
     const { clientId } = event;
     const timeStamp = event.timestamp;
     const eventId = event.id;
-    console.log("Events Data",event);
+    console.log("Events Data", event);
 
     const originalEventType = event.name;
     const eventType = eventNameMap[originalEventType] || originalEventType;
@@ -408,7 +419,7 @@ register(({ analytics }) => {
     const utmParams = getUTMParameters(event.data?.url);
     const flatEventData = flattenObject(event.data || {});
 
-    // Step 1: Send User Profile Data to Mixpanel
+    // ✅ Send User Profile Data to Mixpanel
     const userProfilePayload = {
       $token: mixpanelToken,
       $distinct_id: clientId,
@@ -424,7 +435,7 @@ register(({ analytics }) => {
         body: new URLSearchParams({ data: btoa(JSON.stringify(userProfilePayload)) })
       });
 
-      // Step 2: Send Events Data to Mixpanel
+      // ✅ Send Event Data
       const eventPayload = {
         event: eventType,
         properties: {
@@ -452,8 +463,8 @@ register(({ analytics }) => {
       const responseData = await response.text();
       console.log("Mixpanel Event Response:", responseData);
 
-      // Step 3: Send clientId to your backend
-      const appURL = process.env.APP_URL; 
+      // ✅ Send clientId to your backend
+      const appURL = process.env.APP_URL;
       await fetch(`${appURL}/api/store-clientId`, {
         method: 'POST',
         headers: {
@@ -469,15 +480,20 @@ register(({ analytics }) => {
     }
   });
 
-
-
-  // Sending click events data
   analytics.subscribe('clicked', async (event) => {
     const { timestamp, id, clientId } = event;
     const elementid = event.data?.element?.id || "Unknown Element";
     const flatEventData = flattenObject(event.data || {});
-    const parentElementId = getParentIdByChildId(elementid);
-    const utmParams = getUTMParameters(event.data?.url);
+    const pageUrl = event.data?.url || "Unknown";
+    const utmParams = getUTMParameters(pageUrl);
+
+    let parentId = null;
+    try {
+      parentId = getParentIdByChildId(elementid);
+      console.log("Parent ID:", parentId);
+    } catch (error) {
+      console.error("COULD NOT GET PARENT ID:", error.message);
+    }
 
     try {
       const response = await fetch('https://api.mixpanel.com/track/', {
@@ -486,11 +502,11 @@ register(({ analytics }) => {
         body: new URLSearchParams({
           data: btoa(
             JSON.stringify({
-              event: elementid,  //Passing the parent element is as the event name
+              event: elementid, // or use parentId if that should be the event name
               properties: {
                 distinct_id: clientId,
                 token: mixpanelToken,
-                parent_element_id: parentElementId,
+                parent_element_id: parentId,
                 ...flatEventData,
                 ...utmParams
               },
@@ -505,5 +521,4 @@ register(({ analytics }) => {
       console.error("Mixpanel Click Event Error:", error);
     }
   });
-
 });
