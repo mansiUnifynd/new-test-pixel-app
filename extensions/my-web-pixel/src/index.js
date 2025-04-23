@@ -365,7 +365,7 @@ function getUTMParameters(url) {
 }
 
 
-const mixpanelToken = "8f25e7ad6f912954ce63a4ac331ed541";
+const mixpanelToken = "5b1e136ab5f2e01c3ad5116151e68860";
 
 register(({ analytics }) => {
   analytics.subscribe('all_standard_events', async (event) => {
