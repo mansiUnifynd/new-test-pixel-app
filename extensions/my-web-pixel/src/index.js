@@ -364,6 +364,31 @@ function getUTMParameters(url) {
   }
 }
 
+function getParentIdByChildId(childId) {
+  try {
+    const child = document.getElementById(childId);
+    if (!child) {
+      const message = `❌ Child element with id "${childId}" not found in DOM.`;
+      console.warn(message);
+      console.error(new Error(message));
+      return null;
+    }
+
+    const parent = child.parentElement;
+    if (!parent) {
+      const message = `⚠️ Parent of element "${childId}" not found. Returning child id.`;
+      console.warn(message);
+      console.error(new Error(message));
+      return child.id;
+    }
+
+    return parent.id || child.id;
+  } catch (err) {
+    console.error("🔥 Unexpected error in getParentIdByChildId:", err);
+    return null;
+  }
+}
+
 
 const mixpanelToken = "5b1e136ab5f2e01c3ad5116151e68860";
 
@@ -372,6 +397,7 @@ register(({ analytics }) => {
     const { clientId } = event;
     const timeStamp = event.timestamp;
     const eventId = event.id;
+    console.log("Events Data",event);
 
     const originalEventType = event.name;
     const eventType = eventNameMap[originalEventType] || originalEventType;
@@ -450,7 +476,7 @@ register(({ analytics }) => {
     const { timestamp, id, clientId } = event;
     const elementid = event.data?.element?.id || "Unknown Element";
     const flatEventData = flattenObject(event.data || {});
-
+    const parentElementId = getParentIdByChildId(elementid);
     const utmParams = getUTMParameters(event.data?.url);
 
     try {
@@ -464,6 +490,7 @@ register(({ analytics }) => {
               properties: {
                 distinct_id: clientId,
                 token: mixpanelToken,
+                parent_element_id: parentElementId,
                 ...flatEventData,
                 ...utmParams
               },

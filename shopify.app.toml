@@ -3,7 +3,7 @@
 client_id = "c742c2ba100630ea4a69133bdbaf9130"
 name = "my-new-web-pixel-app"
 handle = "my-new-web-pixel-app"
-application_url = "https://bracket-september-identifies-js.trycloudflare.com"
+application_url = "https://block-saw-racing-propecia.trycloudflare.com"
 embedded = true
 
 [build]
@@ -61,9 +61,9 @@ scopes = "read_assigned_fulfillment_orders,read_cart_transforms,read_checkout_br
 
 [auth]
 redirect_urls = [
-  "https://bracket-september-identifies-js.trycloudflare.com/auth/callback",
-  "https://bracket-september-identifies-js.trycloudflare.com/auth/shopify/callback",
-  "https://bracket-september-identifies-js.trycloudflare.com/api/auth/callback"
+  "https://block-saw-racing-propecia.trycloudflare.com/auth/callback",
+  "https://block-saw-racing-propecia.trycloudflare.com/auth/shopify/callback",
+  "https://block-saw-racing-propecia.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
