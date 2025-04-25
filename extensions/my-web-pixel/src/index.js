@@ -366,6 +366,26 @@ function getUTMParameters(url) {
   }
 }
 
+// Get parent id through child id using onclick
+
+// function getParentIdByChildId(childId) {
+//   const element = document.getElementById(childId);
+  
+//   if (element) {
+//       element.onclick = function() {
+//           const parentElement = element.parentElement;
+//           const parentId = parentElement ? parentElement.id : null;
+          
+//           console.log("Element clicked:", element);
+//           console.log("Parent ID:", parentId ? parentId : "No parent element found.");
+          
+//       };
+//   } else {
+//       console.log("Element with ID '" + childId + "' not found.");
+//   }
+// }
+
+
 function getParentIdByChildId(childId) {
   const child = document.getElementById(childId);
   if (child && child.parentElement) {
@@ -376,12 +396,12 @@ function getParentIdByChildId(childId) {
 
 
 //Working parent id by element id
+
 // function getParentIdByChildId(childId) {
 //   if (!childId) {
 //     console.error("getParentIdByChildId was called with an invalid childId:", childId);
 //     return null;
 //   }
-
 //   const child = document.getElementById(childId);
 //   if (child && child.parentElement) {
 //     const parentId = child.parentElement.id;
@@ -391,13 +411,11 @@ function getParentIdByChildId(childId) {
 //     }
 //     return parentId;
 //   }
-
 //   if (!child) {
 //     console.error(`No element found with the provided childId: ${childId}`);
 //   } else {
 //     console.error(`Element found for childId: ${childId}, but it has no parent element.`);
 //   }
-
 //   return child ? child.id : null;
 // }
 
@@ -415,7 +433,7 @@ register(({ analytics }) => {
 
     const pageUrl = event.data?.url || "Unknown";
     const pathname = event.context?.window?.location?.pathname || event.data?.url || "/";
-    const orig_referrer = event.context?.document?.referrer || "Unknown";
+    const orig_referrer = event.context?.document?.referrer || "direct";
     const utmParams = getUTMParameters(event.data?.url);
     const flatEventData = flattenObject(event.data || {});
 
@@ -476,7 +494,7 @@ register(({ analytics }) => {
       });
 
     } catch (error) {
-      console.error("Mixpanel Event Error:", error);
+      console.error("Mixpanel error:", error);
     }
   });
 
@@ -502,7 +520,7 @@ register(({ analytics }) => {
         body: new URLSearchParams({
           data: btoa(
             JSON.stringify({
-              event: elementid, // or use parentId if that should be the event name
+              event: elementid,
               properties: {
                 distinct_id: clientId,
                 token: mixpanelToken,
