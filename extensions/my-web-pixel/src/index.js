@@ -1,11 +1,16 @@
 // import {register} from "@shopify/web-pixels-extension";
 
+// import { mixpanel_token } from '../../mixpan';
+
+// console.log("Mixpanel Token:", mixpanel_token);
+
 // register(({ analytics, browser, init, settings }) => {
 //     // Bootstrap and insert pixel script tag here
 
 //     // Sample subscribe to page view
 //     analytics.subscribe('all_standard_events', (event) => {
-//       console.log('New App Pixel Event', event);
+//       console.log('Events on Lab Store', event);
+//       console.log("Mixpanel Token:", mixpanel_token);
 //     });
 // });
 
